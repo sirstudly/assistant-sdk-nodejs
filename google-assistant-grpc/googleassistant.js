@@ -27,10 +27,19 @@ const embedded_assistant_pb = grpc.load({
     file: path.relative(PROTO_ROOT_DIR, protoFiles.embeddedAssistant.v1alpha2)
 }).google.assistant.embedded.v1alpha2;
 
+const deviceCredentials = require(`./devicecredentials.json`);
+
+const CREDENTIALS = {
+    client_id: deviceCredentials.client_id,
+    client_secret: deviceCredentials.client_secret,
+    refresh_token: deviceCredentials.refresh_token,
+    type: "authorized_user"
+};
+
 class GoogleAssistant {
-    constructor(credentials) {
+    constructor() {
         GoogleAssistant.prototype.endpoint_ = "embeddedassistant.googleapis.com";
-        this.client = this.createClient_(credentials);
+        this.client = this.createClient_(CREDENTIALS);
         this.locale = "en-US";
         this.deviceModelId = 'default';
         this.deviceInstanceId = 'default';
@@ -86,28 +95,4 @@ class GoogleAssistant {
     }
 }
 
-const homedir = require('homedir')
-const deviceCredentials = require(`${homedir()}/.config/google-oauthlib-tool/credentials.json`);
-
-const CREDENTIALS = {
-    client_id: deviceCredentials.client_id,
-    client_secret: deviceCredentials.client_secret,
-    refresh_token: deviceCredentials.refresh_token,
-    type: "authorized_user"
-};
-
-const assistant = new GoogleAssistant(CREDENTIALS);
-const stdio = require('stdio');
-// Allow user to continually input questions and receive answers.
-const promptUser = () => {
-    stdio.question('> ', (err, prompt) => {
-        assistant.assist(prompt)
-            .then(({ text }) => {
-                console.log(text); // Will log the answer
-                promptUser();
-            });
-    });
-};
-
-promptUser();
 module.exports = GoogleAssistant;
