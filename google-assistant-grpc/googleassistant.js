@@ -16,16 +16,38 @@
 
 'use strict';
 const path = require('path');
-const grpc = require('grpc');
+//const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
+var protoLoader = require('@grpc/proto-loader');
 const protoFiles = require('google-proto-files');
 const resolve = require('resolve');
 const GoogleAuth = require('google-auth-library');
 
 const PROTO_ROOT_DIR = protoFiles('..');
+
+/*
 const embedded_assistant_pb = grpc.load({
     root: PROTO_ROOT_DIR,
     file: path.relative(PROTO_ROOT_DIR, protoFiles.embeddedAssistant.v1alpha2)
 }).google.assistant.embedded.v1alpha2;
+
+ */
+
+var packageDefinition = protoLoader.loadSync(
+    PROTO_ROOT_DIR + '/' + path.relative(PROTO_ROOT_DIR, protoFiles.embeddedAssistant.v1alpha2),
+    {keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true,
+        includeDirs: [
+            PROTO_ROOT_DIR
+        ],
+    });
+const embedded_assistant_pb = grpc.loadPackageDefinition(packageDefinition).google.assistant.embedded.v1alpha2;
+
+
+//console.log( embedded_assistant_pb.AssistConfig.type ); process.exit();
 
 class GoogleAssistant {
     constructor(credentials) {
@@ -38,8 +60,8 @@ class GoogleAssistant {
     createClient_(credentials) {
         const sslCreds = grpc.credentials.createSsl();
         // https://github.com/google/google-auth-library-nodejs/blob/master/ts/lib/auth/refreshclient.ts
-        const auth = new GoogleAuth();
-        const refresh = new auth.UserRefreshClient();
+        const auth = new GoogleAuth.GoogleAuth();
+        const refresh = new GoogleAuth.UserRefreshClient();
         refresh.fromJSON(credentials, function (res) { });
         const callCreds = grpc.credentials.createFromGoogleCredential(refresh);
         const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, callCreds);
@@ -48,21 +70,48 @@ class GoogleAssistant {
     }
 
     assist(input) {
+        /* This is the old code from using the grpc library (as opposed to @grpc/proto-loader and @grpc/grpc-js
+         *
         const config = new embedded_assistant_pb.AssistConfig();
+
         config.setTextQuery(input);
+
         config.setAudioOutConfig(new embedded_assistant_pb.AudioOutConfig());
         config.getAudioOutConfig().setEncoding(1);
         config.getAudioOutConfig().setSampleRateHertz(16000);
         config.getAudioOutConfig().setVolumePercentage(100);
+
         config.setDialogStateIn(new embedded_assistant_pb.DialogStateIn());
-        config.setDeviceConfig(new embedded_assistant_pb.DeviceConfig());
         config.getDialogStateIn().setLanguageCode(this.locale);
+
+        config.setDeviceConfig(new embedded_assistant_pb.DeviceConfig());
         config.getDeviceConfig().setDeviceId(this.deviceInstanceId);
         config.getDeviceConfig().setDeviceModelId(this.deviceModelId);
+
         const request = new embedded_assistant_pb.AssistRequest();
         request.setConfig(config);
-
         delete request.audio_in;
+         */
+
+        const request =
+            { config:
+                {
+                    text_query: input,
+                    audio_out_config: {
+                        encoding: "LINEAR16",
+                        sample_rate_hertz: 16000,
+                        volume_percentage: 100
+                    },
+                    dialog_state_in: {
+                        language_code: this.locale
+                    },
+                    device_config: {
+                        device_id: this.deviceInstanceId,
+                        device_model_id: this.deviceModelId
+                    }
+                }
+            }
+
         const conversation = this.client.assist();
         return new Promise((resolve, reject) => {
             let response = {};
