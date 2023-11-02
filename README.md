@@ -1,5 +1,10 @@
 # Google Assistant SDK for devices - Node.js
 
+## This fork
+
+I've updated the sample code in google-assistant-grpc to use the newest google-auth-lib
+and to use @grpc/proto-loader and @grpc/grpc-js instead of the deprecated grpc library
+
 ## Setup
 
 1. Create or open a project in the [Actions Console](http://console.actions.google.com)
