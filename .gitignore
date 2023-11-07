@@ -3,4 +3,4 @@ google-assistant-grpc/package-lock.json
 devicecredentials.json
 credentials.json
 *.class
-
+**/._*
