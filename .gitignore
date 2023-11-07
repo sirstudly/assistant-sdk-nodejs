@@ -1,6 +1,7 @@
+.idea/*
 google-assistant-grpc/node_modules/*
 google-assistant-grpc/package-lock.json
-devicecredentials.json
-credentials.json
+google-assistant-grpc/devicecredentials.json
+google-assistant-grpc/credentials.json
 *.class
 **/._*

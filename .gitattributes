@@ -5,4 +5,5 @@
 # to native line endings on checkout.
 *.java text
 *.xml text
+*.yml text
 *.properties text

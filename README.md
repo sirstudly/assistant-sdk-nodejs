@@ -2,6 +2,8 @@
 
 ## This fork
 
+Taken from: https://github.com/Kate6/assistant-sdk-nodejs
+
 I've updated the sample code in google-assistant-grpc to use the newest google-auth-lib
 and to use @grpc/proto-loader and @grpc/grpc-js instead of the deprecated grpc library
 

@@ -1,0 +1,17 @@
+version: "3.2"
+services:
+  google-assistant:
+    build:
+      context: './python3/'
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION}
+    ports:
+      - 7896:7896 # remote debugging port
+    networks:
+      - backend
+    volumes:
+      - ./google-assistant/:/root/google-assistant/
+      - ./google-assistant-grpc/:/root/google-assistant-grpc/
+    container_name: google-assistant
+networks:
+  backend:
